@@ -59,10 +59,16 @@ function FloatySystem.CreateFloaty(plr: Player, floattype: string, spawnCframe: 
 	end
 
 	local vector_force = base.VectorForce
+	local side_force: VectorForce = base:FindFirstChild("SideForce")
 	local align_orientation: AlignOrientation = base.AlignOrientation
 
 	if not vector_force then
 		warn("VectorForce not found in base part of floaty model: " .. floattype)
+		return
+	end
+
+	if not side_force then
+		warn("Side force not found in base part of floaty model: " .. floattype)
 		return
 	end
 
@@ -80,12 +86,9 @@ function FloatySystem.CreateFloaty(plr: Player, floattype: string, spawnCframe: 
 		--align orientation with closest waypoint
 		align_orientation.CFrame = CFrame.Angles(0, math.rad(closestWaypoint.Orientation.Y - 90), math.rad(90))
 
-		--vector_force.Force = base.CFrame.LookVector * seat.Throttle * pow
-		local original_look_vector = base.CFrame.LookVector
-		local adjustedLookVector = Vector3.new(original_look_vector.X, 0, original_look_vector.Y)
+		vector_force.Force = Vector3.new(pow, 0, 0) * seat.Throttle
 
-		seat.AssemblyLinearVelocity = adjustedLookVector * seat.Throttle * pow
-		base.AssemblyLinearVelocity = adjustedLookVector * seat.Throttle * pow
+		side_force.Force = Vector3.new(0, 0, pow * seat.Steer)
 
 		if math.round(seat.AssemblyLinearVelocity.Magnitude) > max_speed then
 			base.AssemblyLinearVelocity = max_speed * base.AssemblyLinearVelocity.Unit
